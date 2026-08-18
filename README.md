@@ -15,28 +15,15 @@
 
 ## 📸 Screenshots
 
-> _Add your screenshots here_
+<div align="center">
 
-<!-- 
-  Suggested screenshots to add:
-  1. Home screen / empty state
-  2. Sidebar with form filled in
-  3. Generated itinerary output
-  4. Budget breakdown tab
-  5. Agent activity / reasoning log
--->
+| **Home Screen** | **Generated Itinerary** |
+| :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/c029b5d5-a6fb-4dce-a2eb-051f7995a6d2" width="100%" alt="Home Screen" /> | <img src="https://github.com/user-attachments/assets/8a4c3918-f8e8-4b2f-830b-8118712fe2dc" width="100%" alt="Generated Itinerary" /> |
+| **Budget Breakdown** | **Agent Activity Log** |
+| <img src="https://github.com/user-attachments/assets/62e235b8-90b5-476c-adf3-bc55c92f6274" width="100%" alt="Budget Breakdown" /> | _(Screenshot to be added)_ |
 
-| Home Screen |
-|:-----------:|:-------------------:|
-|<img width="1901" height="953" alt="image" src="https://github.com/user-attachments/assets/c029b5d5-a6fb-4dce-a2eb-051f7995a6d2" />
-Generated Itinerary
-|<img width="1911" height="1071" alt="image" src="https://github.com/user-attachments/assets/8a4c3918-f8e8-4b2f-830b-8118712fe2dc" />
-|
-
-| Budget Breakdown | Agent Activity Log |
-|:----------------:|:-----------------:|
-|<img width="1909" height="1003" alt="image" src="https://github.com/user-attachments/assets/62e235b8-90b5-476c-adf3-bc55c92f6274" />
-| _screenshot_ |
+</div>
 
 ---
 
