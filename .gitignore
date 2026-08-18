@@ -1,0 +1,50 @@
+# ── Secrets & Environment ──────────────────────────────────────────
+.env
+*.env
+!.env.example
+
+# ── Python ─────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pycache
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ── Virtual Environments ────────────────────────────────────────────
+venv/
+env/
+.venv/
+.env/
+ENV/
+
+# ── Logs ───────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── OS Files ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE / Editor ───────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Streamlit ──────────────────────────────────────────────────────
+.streamlit/secrets.toml
+
+# ── Jupyter ────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Testing / Coverage ─────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/

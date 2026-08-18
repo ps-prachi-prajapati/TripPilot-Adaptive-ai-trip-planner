@@ -1,0 +1,372 @@
+/* 
+  Modern Light Theme (White UI) for AI Trip Planner
+  Clean, crisp, high-contrast, premium aesthetic
+*/
+
+/* ── Hide Streamlit chrome ───────────────────────────────────── */
+#MainMenu  { visibility: hidden; }
+footer     { visibility: hidden; }
+
+/* Hide ONLY the Deploy button & status widget — NOT the whole toolbar
+   (the toolbar also contains the sidebar toggle button!) */
+[data-testid="stAppDeployButton"],
+[data-testid="stStatusWidget"],
+.stDeployButton { display: none !important; }
+
+/* Clean, transparent header — keeps the native toggle in top-left */
+header[data-testid="stHeader"] {
+    background: rgba(248, 250, 252, 0.92) !important;
+    backdrop-filter: blur(6px) !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+}
+
+/* Style the toggle button — colour only, NO position overrides */
+[data-testid="collapsedControl"] {
+    background: #2563EB !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+}
+[data-testid="collapsedControl"]:hover {
+    background: #1D4ED8 !important;
+}
+[data-testid="collapsedControl"] svg {
+    fill: #FFFFFF !important;
+    color: #FFFFFF !important;
+}
+
+
+
+/* Base app styling */
+
+.stApp {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+}
+
+/* Sidebar styling */
+[data-testid="stSidebar"] {
+    background-color: #FFFFFF;
+    border-right: 1px solid #E2E8F0;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.02);
+}
+
+[data-testid="stSidebar"] h3 {
+    color: #0F172A !important;
+    font-weight: 700;
+}
+
+/* Primary Button Styling */
+.stButton > button {
+    background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    padding: 10px 20px !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+    transition: all 0.2s ease !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35) !important;
+    background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%) !important;
+}
+
+/* Secondary Button Styling */
+.stButton > button[kind="secondary"] {
+    background: #F1F5F9 !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+    box-shadow: none !important;
+}
+
+.stButton > button[kind="secondary"]:hover {
+    background: #E2E8F0 !important;
+    color: #0F172A !important;
+}
+
+/* Custom premium card */
+.premium-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.premium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -5px rgba(0, 0, 0, 0.04);
+    border-color: #CBD5E1;
+}
+
+.premium-card h3 {
+    margin-top: 0;
+    color: #64748B;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.premium-card h2 {
+    margin-top: 4px;
+    color: #0F172A;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+/* Flexbox rows for cards */
+.card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #F1F5F9;
+    padding-top: 16px;
+    margin-top: 16px;
+}
+
+.card-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-stat-label {
+    font-size: 0.75rem;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.card-stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0F172A;
+}
+
+/* Tags */
+.tag {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563EB;
+    border-radius: 9999px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    letter-spacing: 0.025em;
+}
+
+.tag.success { background: rgba(16, 185, 129, 0.1); color: #059669; }
+.tag.danger { background: rgba(239, 68, 68, 0.1); color: #DC2626; }
+.tag.warning { background: rgba(245, 158, 11, 0.1); color: #D97706; }
+
+/* Tabs styling override */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 24px;
+    border-bottom: 2px solid #E2E8F0;
+    margin-bottom: 24px;
+    background: transparent;
+}
+
+.stTabs [data-baseweb="tab"] {
+    height: 50px;
+    white-space: pre-wrap;
+    background-color: transparent;
+    border-radius: 6px 6px 0 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: #64748B;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.stTabs [aria-selected="true"] {
+    background-color: transparent !important;
+    border-bottom: 3px solid #2563EB !important;
+    color: #2563EB !important;
+    font-weight: 700;
+}
+
+/* Adaptation summary box */
+.adapt-summary {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-left: 4px solid #F59E0B;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 32px;
+    color: #92400E;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.adapt-summary h4 {
+    color: #B45309;
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+}
+
+/* Markdown Timeline Styling */
+.stMarkdown h2 {
+    font-size: 1.3rem;
+    color: #2563EB;
+    margin-top: 32px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #E2E8F0;
+    font-weight: 700;
+}
+
+.stMarkdown ul {
+    list-style-type: none;
+    border-left: 2px solid #CBD5E1;
+    padding-left: 24px;
+    margin-left: 8px;
+}
+
+.stMarkdown li {
+    position: relative;
+    margin-bottom: 16px;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+.stMarkdown li::before {
+    content: '';
+    position: absolute;
+    left: -31px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    background-color: #2563EB;
+    border: 2px solid #FFFFFF;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #2563EB;
+}
+
+/* Empty State / Welcome Screen */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    text-align: center;
+    color: #475569;
+    animation: fadeIn 0.6s ease forwards;
+}
+
+.empty-state h1 {
+    color: #0F172A;
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+.empty-state p {
+    font-size: 1.15rem;
+    max-width: 520px;
+    color: #475569;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Agent Activity Logs */
+.agent-log-container {
+    margin-top: 10px;
+    border-left: 2px solid #CBD5E1;
+    padding-left: 20px;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.agent-log-item {
+    position: relative;
+    background: #FFFFFF;
+    padding: 14px 18px;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    color: #334155;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.log-indicator {
+    position: absolute;
+    left: -27px;
+    top: 18px;
+    width: 12px;
+    height: 12px;
+    background: #2563EB;
+    border-radius: 50%;
+    border: 2px solid #FFFFFF;
+}
+
+.log-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.log-icon {
+    font-size: 1.1rem;
+}
+
+.log-title {
+    font-weight: 600;
+    color: #0F172A;
+}
+
+.log-content {
+    background: #F8FAFC;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+    margin-top: 8px;
+}
+
+.log-content code {
+    color: #0F172A !important;
+    background: transparent !important;
+    padding: 0 !important;
+    font-size: 0.85rem !important;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* Streamlit Native Inputs in Light Mode */
+.stTextInput input, .stNumberInput input, .stSelectbox select, .stTextArea textarea {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+}
+
+.stTextInput input:focus, .stNumberInput input:focus, .stTextArea textarea:focus {
+    border-color: #2563EB !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
