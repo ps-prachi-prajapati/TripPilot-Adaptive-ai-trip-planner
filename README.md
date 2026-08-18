@@ -28,11 +28,14 @@
 
 | Home Screen | Generated Itinerary |
 |:-----------:|:-------------------:|
-| _screenshot_ | _screenshot_ |
+|<img width="1901" height="953" alt="image" src="https://github.com/user-attachments/assets/c029b5d5-a6fb-4dce-a2eb-051f7995a6d2" />
+|<img width="1911" height="1071" alt="image" src="https://github.com/user-attachments/assets/8a4c3918-f8e8-4b2f-830b-8118712fe2dc" />
+|
 
 | Budget Breakdown | Agent Activity Log |
 |:----------------:|:-----------------:|
-| _screenshot_ | _screenshot_ |
+|<img width="1909" height="1003" alt="image" src="https://github.com/user-attachments/assets/62e235b8-90b5-476c-adf3-bc55c92f6274" />
+| _screenshot_ |
 
 ---
 
