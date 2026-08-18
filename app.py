@@ -86,13 +86,15 @@ def main():
     # Pre-process pending destination query before rendering widgets
     if "pending_dest_query" in st.session_state:
         st.session_state["dest_query_input"] = st.session_state.pop("pending_dest_query")
+        st.session_state["auto_trigger_plan"] = True
         
     # Render Sidebar and get inputs
     inputs = render_planning_sidebar()
     
     # Handle Generation Trigger
-    auto_trigger = st.session_state.pop("auto_trigger_plan", False)
+    auto_trigger = st.session_state.get("auto_trigger_plan", False)
     if inputs["generate_btn"] or auto_trigger:
+        st.session_state.pop("auto_trigger_plan", None)
         if not inputs["demo_mode"]:
             validation_error = validate_trip_inputs(inputs["location"], inputs["budget"])
             if validation_error:

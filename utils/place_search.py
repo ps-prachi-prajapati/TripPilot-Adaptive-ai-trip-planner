@@ -25,10 +25,12 @@ KNOWN_COORDINATES = {
 }
 
 def clean_place_name(place_str: str) -> str:
-    """Strips leading emoji icons from place option strings."""
+    """Strips leading emoji icons and replaces ampersands with commas for better geocoding."""
     if not place_str:
         return ""
     cleaned = re.sub(r'^[^\w\s]+', '', place_str).strip()
+    # Replace ampersands with commas for better autocomplete geocoding
+    cleaned = cleaned.replace(" & ", ", ").replace("&", ",")
     return cleaned if cleaned else place_str
 
 GEOAPIFY_CACHE = {}
