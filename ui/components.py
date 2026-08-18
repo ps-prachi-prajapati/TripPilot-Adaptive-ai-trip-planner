@@ -64,12 +64,17 @@ def render_destination_card(candidate: dict, is_selected: bool = False):
     valid = candidate.get("valid", False)
     rejection_reason = candidate.get("rejection_reason", "")
     
-    border_color = "#34D399" if is_selected else ("#F87171" if not valid else "#4A5568")
+    # Border color should reflect validity and selection
+    border_color = "#34D399" if is_selected and valid else ("#F87171" if not valid else "#4A5568")
+    status_color = "#34D399" if valid else "#F87171"
     
     # Construct tags
     tags_html = ""
     if is_selected:
-        tags_html += '<span class="tag success">🏆 Selected Match</span>'
+        if valid:
+            tags_html += '<span class="tag success">🏆 Selected Match</span>'
+        else:
+            tags_html += '<span class="tag warning" style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #F59E0B; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">⚠️ Selected Match (Budget Exceeded)</span>'
     elif not valid:
         tags_html += '<span class="tag danger">❌ Rejected</span>'
     else:
@@ -88,7 +93,7 @@ def render_destination_card(candidate: dict, is_selected: bool = False):
             </div>
             <div class="card-stat" style="text-align: right;">
                 <span class="card-stat-label">Status</span>
-                <span class="card-stat-value" style="color: {border_color};">{'Approved' if valid else 'Failed'}</span>
+                <span class="card-stat-value" style="color: {status_color};">{'Approved' if valid else 'Failed'}</span>
             </div>
         </div>
     """

@@ -128,6 +128,7 @@ async def evaluation_node(state: TripState) -> dict:
         if budget_check["budget_conflict"]:
             c["valid"] = False
             c["rejection_reason"] = budget_check["message"]
+            c["score"] = budget_check["variance"]
             logger.info(f"[Evaluation Node] Candidate '{c['name']}' REJECTED: {budget_check['message']}")
             continue
             
