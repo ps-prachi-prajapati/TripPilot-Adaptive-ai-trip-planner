@@ -26,9 +26,10 @@
   5. Agent activity / reasoning log
 -->
 
-| Home Screen | Generated Itinerary |
+| Home Screen |
 |:-----------:|:-------------------:|
 |<img width="1901" height="953" alt="image" src="https://github.com/user-attachments/assets/c029b5d5-a6fb-4dce-a2eb-051f7995a6d2" />
+Generated Itinerary
 |<img width="1911" height="1071" alt="image" src="https://github.com/user-attachments/assets/8a4c3918-f8e8-4b2f-830b-8118712fe2dc" />
 |
 
