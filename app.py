@@ -83,11 +83,16 @@ async def adapt_trip(state: TripState, condition: str):
 def main():
     render_home_header()
     
+    # Pre-process pending destination query before rendering widgets
+    if "pending_dest_query" in st.session_state:
+        st.session_state["dest_query_input"] = st.session_state.pop("pending_dest_query")
+        
     # Render Sidebar and get inputs
     inputs = render_planning_sidebar()
     
     # Handle Generation Trigger
-    if inputs["generate_btn"]:
+    auto_trigger = st.session_state.pop("auto_trigger_plan", False)
+    if inputs["generate_btn"] or auto_trigger:
         if not inputs["demo_mode"]:
             validation_error = validate_trip_inputs(inputs["location"], inputs["budget"])
             if validation_error:

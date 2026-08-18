@@ -74,9 +74,11 @@ def render_planning_sidebar():
         st.markdown("### Plan New Trip")
         
         # 1. Starting Location (Origin) Autocomplete Search
+        if "start_query_input" not in st.session_state:
+            st.session_state["start_query_input"] = "Ahmedabad"
         start_query = st.text_input(
             "📍 Starting Location (Origin)",
-            value="Ahmedabad",
+            key="start_query_input",
             help="Type to search starting city, landmark, or address (Geoapify Autocomplete).",
             placeholder="e.g. Ahmedabad, Surat..."
         )
@@ -95,9 +97,11 @@ def render_planning_sidebar():
             origin_details = get_geoapify_place_details("", start_location)
 
         # 2. Target Destination Autocomplete Search
+        if "dest_query_input" not in st.session_state:
+            st.session_state["dest_query_input"] = "Vadodara"
         dest_query = st.text_input(
             "🏁 Target Destination",
-            value="Vadodara",
+            key="dest_query_input",
             help="Type to search destination city, landmark, or address (Geoapify Autocomplete).",
             placeholder="e.g. Vadodara, Jaipur..."
         )
