@@ -47,6 +47,22 @@ async def extraction_node(state: TripState) -> dict:
     target_dest = state.get('destination_location') or state.get('location') or "Vadodara"
     sub_loc = state.get('sub_location') or "Any Area"
 
+    # If the target destination is already a specific candidate area (containing " & "),
+    # use it directly as the sole candidate instead of querying the LLM for other alternatives.
+    if " & " in target_dest:
+        logger.info(f"[Extraction Node] Target is a specific candidate area: '{target_dest}'. Bypassing generic candidate identification.")
+        candidates = [{
+            "name": target_dest,
+            "context": {},
+            "valid": None,
+            "score": 0.0
+        }]
+        return {
+            "candidates": candidates,
+            "current_candidate_index": 0,
+            "messages": []
+        }
+
     human_msg = HumanMessage(content=SYSTEM_EXTRACTION_PROMPT.format(
         location=state.get('location'),
         target_destination=target_dest,
