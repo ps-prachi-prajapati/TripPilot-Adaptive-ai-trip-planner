@@ -72,7 +72,7 @@ Location Search   → OpenStreetMap Nominatim API
 Places Data       → Local Mock Places Catalog (offline database)
 Weather Data      → OpenWeatherMap API
 Routing Data      → OpenRouteService API
-Map Display       → Folium (interactive Leaflet maps in Streamlit)
+Map Display       → Google Maps Embed API (interactive iframe in Streamlit)
 Config            → python-dotenv (.env file)
 Testing           → Streamlit AppTest + Python unittest
 ```
