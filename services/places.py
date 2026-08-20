@@ -89,6 +89,59 @@ def _parse_foursquare_place(place: dict) -> dict:
         "lon": place.get("geocodes", {}).get("main", {}).get("longitude")
     }
 
+def _customize_place_for_location(place: dict, location: str) -> dict:
+    """Rewrite mock place details dynamically to match target city search context."""
+    city = "Destination"
+    if location:
+        parts = [p.strip() for p in location.split(",")]
+        if len(parts) > 0:
+            city = parts[-1]
+            if city.lower() in ["india", "usa", "uk"] and len(parts) > 1:
+                city = parts[-2]
+            else:
+                city = parts[0]
+                
+    place_copy = dict(place)
+    place_copy["address"] = f"{location}, India"
+    name = place_copy["name"]
+    
+    # Map Vadodara defaults to target city
+    name_map = {
+        "Laxmi Vilas Palace": "Royal Heritage Palace",
+        "Sayaji Baug": "Central Botanical Garden",
+        "EME Temple": "Heritage Temple",
+        "Mandap Restaurant": "Traditional Thali Restaurant",
+        "Jassi De Parathe": "Punjabi Dhaba",
+        "Vivanta Vadodara": "Luxury Palace Stay",
+        "Sayaji Hotel Vadodara": "Heritage Boutique Hotel",
+        "Sayaji Baug Zoo & Park": "Zoo & Nature Park",
+        "Baroda Museum & Picture Gallery": "National Art Museum",
+        "Kirti Mandir": "Memorial Heritage Site",
+        "Inorbit Mall Vadodara": "Premier Shopping Mall",
+        "Alkapuri Club Ground": "Recreation Club Ground",
+        "Kamati Baug Garden": "Royal Garden Walkway",
+        "Sardar Patel Planetarium": "Space Planetarium",
+        "MSU Dome": "Historical University Dome",
+        "Fatehgunj Garden": "Neighborhood Leisure Park",
+        "Sayaji Restaurant": "Grand Buffet Dining",
+        "Peshawri Mughlai Dining": "Fine Mughlai Diner",
+        "Barbeque Nation Alkapuri": "Barbecue & Grill",
+        "22nd Parallel South Indian": "Traditional South Indian Cafe",
+        "Grand Mercure Vadodara Surya Palace": "Grand Luxury Hotel",
+        "Surya Palace Hotel": "Plaza Hotel",
+        "Welcomhotel by ITC Hotels Alkapuri": "Royal ITC Palace Hotel",
+        "Hyatt Place Vadodara": "Premium Hyatt Regency Stay",
+        "Downtown Area": "Central Plaza",
+        "Recommended Place": "Signature Landmark"
+    }
+    
+    for old_n, new_n in name_map.items():
+        if old_n in name:
+            place_copy["name"] = name.replace(old_n, f"{new_n} in {city}")
+            break
+            
+    return place_copy
+
 def fetch_destinations(query: str, limit: int) -> list[dict]:
     # Return local catalog data directly
     loc_key = "default"
@@ -97,7 +150,17 @@ def fetch_destinations(query: str, limit: int) -> list[dict]:
             loc_key = k
             break
     results = DEFAULT_DESTINATIONS[loc_key][:limit]
-    return [_parse_foursquare_place(r) for r in results]
+    parsed = [_parse_foursquare_place(r) for r in results]
+    if loc_key == "default":
+        # Rewrite candidate destinations to be sub-areas of the query city (e.g. "Jaipur")
+        city = query.split(",")[0].strip().capitalize()
+        # Create 3 diverse mock areas for the city
+        parsed = [
+            {"id": "mock_dest_custom_1", "name": f"Heritage Fort Area, {city}", "category": "Neighborhood", "address": f"Heritage District, {city}, India", "distance": 1000, "rating": 4.5, "lat": 23.0225, "lon": 72.5714},
+            {"id": "mock_dest_custom_2", "name": f"Downtown Central, {city}", "category": "Neighborhood", "address": f"Commercial Zone, {city}, India", "distance": 2000, "rating": 4.3, "lat": 23.0225, "lon": 72.5714},
+            {"id": "mock_dest_custom_3", "name": f"Lakeside Boulevard, {city}", "category": "Neighborhood", "address": f"Scenic Waterfront, {city}, India", "distance": 3000, "rating": 4.6, "lat": 23.0225, "lon": 72.5714}
+        ][:limit]
+    return parsed
 
 def fetch_attractions(location: str, query: str, limit: int) -> list[dict]:
     # Return local catalog data directly
@@ -107,7 +170,10 @@ def fetch_attractions(location: str, query: str, limit: int) -> list[dict]:
             loc_key = k
             break
     results = DEFAULT_ATTRACTIONS[loc_key][:limit]
-    return [_parse_foursquare_place(r) for r in results]
+    parsed = [_parse_foursquare_place(r) for r in results]
+    if "vadodara" not in location.lower():
+        parsed = [_customize_place_for_location(p, location) for p in parsed]
+    return parsed
 
 def fetch_restaurants(location: str, query: str, limit: int) -> list[dict]:
     # Return local catalog data directly
@@ -117,7 +183,10 @@ def fetch_restaurants(location: str, query: str, limit: int) -> list[dict]:
             loc_key = k
             break
     results = DEFAULT_RESTAURANTS[loc_key][:limit]
-    return [_parse_foursquare_place(r) for r in results]
+    parsed = [_parse_foursquare_place(r) for r in results]
+    if "vadodara" not in location.lower():
+        parsed = [_customize_place_for_location(p, location) for p in parsed]
+    return parsed
 
 def fetch_hotels(location: str, query: str, limit: int) -> list[dict]:
     # Return local catalog data directly
@@ -127,7 +196,10 @@ def fetch_hotels(location: str, query: str, limit: int) -> list[dict]:
             loc_key = k
             break
     results = DEFAULT_HOTELS[loc_key][:limit]
-    return [_parse_foursquare_place(r) for r in results]
+    parsed = [_parse_foursquare_place(r) for r in results]
+    if "vadodara" not in location.lower():
+        parsed = [_customize_place_for_location(p, location) for p in parsed]
+    return parsed
 
 def fetch_place_details(place_id: str) -> dict:
     # Return default details directly
@@ -136,7 +208,7 @@ def fetch_place_details(place_id: str) -> dict:
         "name": f"Recommended Place ({place_id})",
         "category": "Sightseeing",
         "description": "A popular point of interest highly rated by visitors for its scenic view and local experience.",
-        "address": "Vadodara, Gujarat, India",
+        "address": "Local Area, India",
         "rating": 4.5,
         "website": "http://example.com",
         "phone": "+91 98765 43210"
