@@ -5,23 +5,26 @@ preventing the LLM from making arithmetic mistakes.
 """
 
 from typing import List, Dict, Any
-from fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+except ImportError:
+    from fastmcp import FastMCP
 
 mcp = FastMCP("Budget Evaluation MCP Server")
 
-# ── Cost Estimation Data (USD) ────────────────────────────────────────────────
+# ── Cost Estimation Data (INR) ────────────────────────────────────────────────
 ACCOMMODATION_TIERS = {
-    "budget":   {"avg": 50,  "label": "Budget Hostel/Motel"},
-    "mid":      {"avg": 150, "label": "3-Star Hotel"},
-    "comfort":  {"avg": 250, "label": "4-Star Hotel"},
-    "luxury":   {"avg": 500, "label": "5-Star Resort"},
+    "budget":   {"avg": 1500,  "label": "Budget Hostel/Motel"},
+    "mid":      {"avg": 4000, "label": "3-Star Hotel"},
+    "comfort":  {"avg": 8000, "label": "4-Star Hotel"},
+    "luxury":   {"avg": 15000, "label": "5-Star Resort"},
 }
 
 MEAL_TIERS = {
-    "budget":   {"avg": 30,  "label": "Fast food / Groceries"},
-    "mid":      {"avg": 60,  "label": "Casual restaurants"},
-    "comfort":  {"avg": 100, "label": "Good restaurants"},
-    "luxury":   {"avg": 200, "label": "Fine dining"},
+    "budget":   {"avg": 500,  "label": "Fast food / Groceries"},
+    "mid":      {"avg": 1200,  "label": "Casual restaurants"},
+    "comfort":  {"avg": 2500, "label": "Good restaurants"},
+    "luxury":   {"avg": 5000, "label": "Fine dining"},
 }
 
 @mcp.tool()

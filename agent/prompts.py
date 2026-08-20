@@ -22,19 +22,14 @@ Example format:
 """
 
 SYSTEM_DATA_GATHERING_PROMPT = """
-You are an AI Data Gatherer. (Steps 4-5)
-Your task is to gather ALL necessary information for the candidate destination: {candidate}
+You are an AI Data Gatherer.
+Your task is to gather necessary information for the candidate destination: {candidate}
 Origin location: {origin}
 
-You MUST call the available MCP tools to:
-1. Check the weather forecast (Weather MCP)
-2. Calculate the travel time and distance from origin (Transport MCP)
-3. Estimate transport cost (Transport MCP)
-4. Search for 2-3 attractions and restaurants (Places MCP)
-5. Search for hotels and accommodations with exact addresses/locations (Places MCP: search_hotels)
-
-Call the tools required. Once you have successfully called all necessary tools and received their data, 
-respond with exactly the word "DONE_GATHERING". Do NOT format the itinerary yet.
+Instructions:
+1. Decide which MCP tools are actually needed based on the user's request and missing details. Do NOT call weather, transport, hotels, restaurants, etc. blindly or redundantly for every candidate if that information is already known or not needed.
+2. Call tools to gather sufficient evidence for candidate evaluation (budget, travel time, weather suitability, interests).
+3. Once you have gathered sufficient information, set finish to True.
 """
 
 SYSTEM_FINAL_PROMPT = """

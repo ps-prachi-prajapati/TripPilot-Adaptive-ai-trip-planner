@@ -1,7 +1,11 @@
 import os
 import sys
 import requests
-from fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+except ImportError:
+    from fastmcp import FastMCP
+from typing import Any
 
 # Ensure the project root is in the path so `services` can be found
 # when this script is launched as a subprocess by the MCP client
@@ -12,7 +16,7 @@ from services.transport import fetch_travel_time
 mcp = FastMCP("Transport MCP Server")
 
 @mcp.tool()
-def find_transport_options() -> str:
+def find_transport_options() -> Any:
     """
     Returns the transportation modes currently supported by the routing API.
     Agent should use these exact string modes when calculating travel time.
@@ -27,7 +31,7 @@ def find_transport_options() -> str:
     }
 
 @mcp.tool()
-def calculate_travel_time(start_lat: float, start_lon: float, end_lat: float, end_lon: float, mode: str = "driving-car") -> str:
+def calculate_travel_time(start_lat: float, start_lon: float, end_lat: float, end_lon: float, mode: str = "driving-car") -> Any:
     """
     Calculate real travel time and distance between two coordinates.
     
@@ -60,7 +64,7 @@ def calculate_travel_time(start_lat: float, start_lon: float, end_lat: float, en
         return {"status": "error", "message": f"Unexpected Error: {str(e)}"}
 
 @mcp.tool()
-def calculate_transport_cost(distance_km: float, mode: str) -> str:
+def calculate_transport_cost(distance_km: float, mode: str) -> Any:
     """
     Calculates the estimated monetary cost for a trip based on distance and mode.
     Since live transit/rideshare pricing APIs are generally paid/private, 
@@ -77,20 +81,20 @@ def calculate_transport_cost(distance_km: float, mode: str) -> str:
     cost_breakdown = ""
     
     if "car" in mode:
-        # Standard IRS/global average estimation: $0.20 per km gas/wear + Base fee if rideshare
-        cost = (distance_km * 0.20) + 5.0
-        cost_breakdown = "Base fare $5.00 + $0.20/km"
+        # Standard India average estimation: ₹15 per km + ₹100 base fare
+        cost = (distance_km * 15.0) + 100.0
+        cost_breakdown = "Base fare ₹100.00 + ₹15.00/km"
     elif "foot" in mode or "cycling" in mode:
         cost = 0.0
         cost_breakdown = "Free"
     else:
         # Generic fallback
-        cost = 2.50
+        cost = 200.0
         cost_breakdown = "Flat rate assumption"
         
     return {
         "status": "success",
-        "estimated_cost_usd": round(cost, 2),
+        "estimated_cost_inr": round(cost, 2),
         "calculation_basis": cost_breakdown,
         "mode": mode,
         "distance_km": distance_km

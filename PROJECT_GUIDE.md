@@ -30,7 +30,7 @@ The **Adaptive AI Trip Planner** is a full-stack, multi-agent AI travel planning
 - **Google Gemini** — The core LLM reasoning engine
 - **Model Context Protocol (MCP)** — Connects the LLM to deterministic external tools
 - **FastMCP** — Server framework for building MCP-compliant tool servers
-- **Geoapify + Foursquare + OpenWeatherMap + OpenRouteService** — Real-world data APIs
+- **OpenStreetMap + OpenWeatherMap + OpenRouteService** — Real-world data APIs (Places Discovery uses a local mock catalog)
 
 The planner solves two hard problems in AI-based travel planning:
 
@@ -68,8 +68,8 @@ Frontend          → Streamlit (Python)
 Orchestration     → LangGraph (StateGraph with conditional routing)
 LLM Engine        → Google Gemini (gemini-3.5-flash-lite)
 Tool Protocol     → Model Context Protocol (MCP) via FastMCP + stdio transport
-Location Search   → Geoapify Geocode Autocomplete API
-Places Data       → Foursquare Places API
+Location Search   → OpenStreetMap Nominatim API
+Places Data       → Local Mock Places Catalog (offline database)
 Weather Data      → OpenWeatherMap API
 Routing Data      → OpenRouteService API
 Map Display       → Folium (interactive Leaflet maps in Streamlit)
@@ -107,7 +107,7 @@ l2 project/
 │   └── client.py             ← MultiServerMCPClient — connects to all 4 MCP servers
 │
 ├── services/                 ← Raw API integration layer (called by MCP servers)
-│   ├── places.py             ← Foursquare API requests
+│   ├── places.py             ← Local mock places catalog retrieval
 │   ├── transport.py          ← OpenRouteService API requests
 │   └── weather.py            ← OpenWeatherMap API requests
 │
@@ -120,7 +120,7 @@ l2 project/
 │   └── components.py         ← CSS injection & shared UI helpers
 │
 ├── utils/
-│   ├── place_search.py       ← Geoapify autocomplete integration + cache
+│   ├── place_search.py       ← OpenStreetMap autocomplete integration + cache
 │   ├── validation.py         ← Input validation logic
 │   └── logging.py            ← Logging setup
 │
@@ -182,7 +182,7 @@ MCP Servers (4 servers, 15 tools total)
 
 ### Places Server — places_server.py
 
-> **Purpose**: Discover real destinations, attractions, restaurants, and hotels using the Foursquare Places API. The agent calls these instead of hallucinating place names.
+> **Purpose**: Discover destinations, attractions, restaurants, and hotels using the local mock catalog. The agent calls these instead of hallucinating place names.
 
 | Tool | Inputs | What It Does | Returns |
 |---|---|---|---|
@@ -190,7 +190,7 @@ MCP Servers (4 servers, 15 tools total)
 | `search_attractions` | `location`, `query`, `limit` | Finds landmarks and tourist activities in a city | Attraction names, addresses, categories |
 | `search_restaurants` | `location`, `query`, `limit` | Finds dining options tailored to the city and preference | Restaurant names, addresses, ratings |
 | `search_hotels` | `location`, `query`, `limit` | Finds lodging/accommodation options | Hotel names, addresses, contact info |
-| `get_place_details` | `place_id` | Gets full details for a single Foursquare place by ID | Name, address, rating, phone, website |
+| `get_place_details` | `place_id` | Gets full details for a single place by ID | Name, address, rating, phone, website |
 
 ---
 
@@ -202,7 +202,7 @@ MCP Servers (4 servers, 15 tools total)
 |---|---|---|---|
 | `find_transport_options` | (none) | Lists the supported travel modes the routing API can handle | driving-car, cycling-regular, foot-walking |
 | `calculate_travel_time` | `start_lat`, `start_lon`, `end_lat`, `end_lon`, `mode` | Queries OpenRouteService for real route distance and duration | `distance_km`, `duration_mins` |
-| `calculate_transport_cost` | `distance_km`, `mode` | Applies standard cost heuristics to compute monetary travel cost | `estimated_cost_usd`, calculation basis |
+| `calculate_transport_cost` | `distance_km`, `mode` | Applies standard cost heuristics to compute monetary travel cost | `estimated_cost_inr`, calculation basis |
 
 ---
 
@@ -412,17 +412,15 @@ User says: "It's going to rain heavily on Day 2"
 | API | Provider | Used For | Env Variable |
 |---|---|---|---|
 | Gemini LLM | Google | Core reasoning in all LangGraph nodes | `GOOGLE_API_KEY` |
-| Geocode Autocomplete | Geoapify | Location search dropdown in sidebar | `GEOAPIFY_API_KEY` |
-| Places Search | Foursquare | Finding attractions, restaurants, hotels | `FOURSQUARE_API_KEY` |
 | Weather Current/Forecast | OpenWeatherMap | Real weather data | `OPENWEATHER_API_KEY` |
 | Route Calculation | OpenRouteService | Travel time & distance calculation | `OPENROUTE_API_KEY` |
-| Fallback Geocoding | OpenStreetMap Nominatim | Used when Geoapify is rate-limited | No key needed |
+| Geocode Autocomplete | OpenStreetMap Nominatim | Location search dropdown in sidebar | No key needed |
 
 ---
 
 ## 9. Feature Walkthrough
 
-### Feature 1: Geoapify Location Autocomplete
+### Feature 1: Location Autocomplete & Search
 
 When you type in the Starting Location or Target Destination fields:
 
@@ -430,17 +428,16 @@ When you type in the Starting Location or Target Destination fields:
 User types: "Uma Vidhyalaya Vadodara"
                   |
                   v
-    utils/place_search.py -> get_geoapify_autocomplete()
+    utils/place_search.py -> get_location_autocomplete()
                   |
                   v
-    GET https://api.geoapify.com/v1/geocode/autocomplete
-        ?text=Uma+Vidhyalaya+Vadodara
-        &filter=countrycode:in       <- restricted to India
-        &apiKey=GEOAPIFY_API_KEY
+    GET https://nominatim.openstreetmap.org/search
+        ?q=Uma+Vidhyalaya+Vadodara
+        &countrycodes=in             <- restricted to India
                   |
                   v
     Returns list of matching places
-    Cached in GEOAPIFY_CACHE dictionary
+    Cached in LOCATION_CACHE dictionary
                   |
                   v
     Displayed as Streamlit selectbox dropdown
@@ -449,9 +446,8 @@ User types: "Uma Vidhyalaya Vadodara"
 ```
 
 **Fallback chain if API fails:**
-1. Geoapify Autocomplete (primary)
-2. OpenStreetMap Nominatim (if Geoapify returns 429/timeout)
-3. Local coordinate database (hardcoded coordinates for major Indian cities)
+1. OpenStreetMap Nominatim (primary)
+2. Local coordinate database (hardcoded coordinates for major Indian cities)
 
 ---
 
@@ -604,9 +600,6 @@ Copy `.env.example` to `.env` and fill in your API keys:
 ```env
 # AI / LLM
 GOOGLE_API_KEY=your_google_gemini_api_key
-
-# Location Autocomplete
-GEOAPIFY_API_KEY=your_geoapify_api_key
 
 # Places Data
 FOURSQUARE_API_KEY=your_foursquare_api_key

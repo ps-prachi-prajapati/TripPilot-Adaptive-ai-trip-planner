@@ -80,20 +80,48 @@ def render_destination_card(candidate: dict, is_selected: bool = False):
     else:
         tags_html += '<span class="tag">✅ Valid Alternative</span>'
         
+    context = candidate.get("context", {})
+    est_cost = context.get("estimated_total_cost", 0.0)
+    est_cost_str = f"₹{round(est_cost, 2)}" if est_cost > 0 else "Pending/Mock"
+
+    # Use the raw budget facts stored per-candidate, NOT the composite score.
+    # score is negated when invalid (even for non-budget reasons like missing attractions),
+    # so reading abs(score) as "budget deviation" gives a misleading result.
+    budget_conflict = context.get("budget_conflict", False)   # True only when cost > user_budget
+    budget_variance = context.get("budget_variance", abs(round(score, 2)))  # absolute ₹ diff
+    budget_color = "#F87171" if budget_conflict else "#34D399"
+    budget_deviation_label = f"₹{round(budget_variance, 2)} {'Over Budget' if budget_conflict else 'Under Budget'}"
+
+    # Fix the selected-but-invalid tag: only say 'Budget Exceeded' if budget actually failed
+    if is_selected:
+        if valid:
+            tags_html = '<span class="tag success">🏆 Selected Match</span>'
+        elif budget_conflict:
+            tags_html = '<span class="tag warning" style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #F59E0B; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">⚠️ Selected Match (Budget Exceeded)</span>'
+        else:
+            tags_html = '<span class="tag warning" style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #F59E0B; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">⚠️ Selected Match (Constraint Failed)</span>'
+
     html = f"""
     <div class="premium-card" style="border-top: 3px solid {border_color};">
         <h3>Candidate</h3>
         <h2>{name}</h2>
-        <div style="margin-bottom: 12px;">{tags_html}</div>
+        <div style="margin-bottom: 16px;">{tags_html}</div>
         
-        <div class="card-row">
+        <div class="card-row" style="margin-bottom: 12px;">
             <div class="card-stat">
-                <span class="card-stat-label">Budget Fit</span>
-                <span class="card-stat-value">₹{abs(round(score, 2))} {'Under' if valid else 'Variance'}</span>
+                <span class="card-stat-label">Estimated Cost</span>
+                <span class="card-stat-value" style="font-size: 1.1rem; color: #E2E8F0;">{est_cost_str}</span>
             </div>
             <div class="card-stat" style="text-align: right;">
                 <span class="card-stat-label">Status</span>
-                <span class="card-stat-value" style="color: {status_color};">{'Approved' if valid else 'Failed'}</span>
+                <span class="card-stat-value" style="color: {status_color}; font-size: 1.1rem;">{'Approved' if valid else 'Failed'}</span>
+            </div>
+        </div>
+        
+        <div class="card-row" style="border-top: 1px solid #1E293B; padding-top: 12px;">
+            <div class="card-stat">
+                <span class="card-stat-label">Budget Deviation</span>
+                <span class="card-stat-value" style="color: {budget_color}; font-size: 0.95rem;">{budget_deviation_label}</span>
             </div>
         </div>
     """

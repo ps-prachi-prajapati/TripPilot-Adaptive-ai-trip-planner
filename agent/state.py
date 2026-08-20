@@ -2,6 +2,11 @@ import operator
 from typing import Annotated, TypedDict, Any
 from langchain_core.messages import BaseMessage
 
+def reduce_messages(left: list, right: list) -> list:
+    if right is None or len(right) == 0:
+        return []
+    return (left or []) + right
+
 class TripState(TypedDict):
     """
     The state dictionary for the 10-step LangGraph Trip Planner Agent.
@@ -20,7 +25,7 @@ class TripState(TypedDict):
 
     
     # LangChain Message History (For Tool execution)
-    messages: Annotated[list[BaseMessage], operator.add]
+    messages: Annotated[list[BaseMessage], reduce_messages]
     
     # Extracted Candidates (Steps 1-3)
     # List of dicts: {"name": str, "description": str, "valid": bool, "score": float, "context": dict}
@@ -41,3 +46,9 @@ class TripState(TypedDict):
     affected_components: list[str]
     adaptation_context: dict
     adaptation_summary: str
+    
+    # State tracking metrics
+    tool_steps_count: int
+    is_verified: bool
+    verification_attempts: int
+    technical_logs: Annotated[list[dict], operator.add]

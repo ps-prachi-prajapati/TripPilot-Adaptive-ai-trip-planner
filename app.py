@@ -121,7 +121,11 @@ def main():
             "changed_condition": "",
             "affected_components": [],
             "adaptation_context": {},
-            "adaptation_summary": ""
+            "adaptation_summary": "",
+            "tool_steps_count": 0,
+            "is_verified": False,
+            "verification_attempts": 0,
+            "technical_logs": []
         }
 
         

@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from utils.place_search import clean_place_name, get_geoapify_autocomplete, get_geoapify_place_details
+from utils.place_search import clean_place_name, get_location_autocomplete, get_location_details
 
 
 
@@ -79,10 +79,10 @@ def render_planning_sidebar():
         start_query = st.text_input(
             "📍 Starting Location (Origin)",
             key="start_query_input",
-            help="Type to search starting city, landmark, or address (Geoapify Autocomplete).",
+            help="Type to search starting city, landmark, or address (OpenStreetMap Autocomplete).",
             placeholder="e.g. Ahmedabad, Surat..."
         )
-        start_suggestions = get_geoapify_autocomplete(start_query)
+        start_suggestions = get_location_autocomplete(start_query)
         if start_suggestions:
             selected_start_desc = st.selectbox(
                 "Select Matching Place (Origin)",
@@ -90,11 +90,11 @@ def render_planning_sidebar():
                 index=0,
                 key="start_loc_select"
             )
-            origin_details = get_geoapify_place_details("", selected_start_desc)
+            origin_details = get_location_details("", selected_start_desc)
             start_location = origin_details["place_name"]
         else:
             start_location = start_query
-            origin_details = get_geoapify_place_details("", start_location)
+            origin_details = get_location_details("", start_location)
 
         # 2. Target Destination Autocomplete Search
         if "dest_query_input" not in st.session_state:
@@ -102,10 +102,10 @@ def render_planning_sidebar():
         dest_query = st.text_input(
             "🏁 Target Destination",
             key="dest_query_input",
-            help="Type to search destination city, landmark, or address (Geoapify Autocomplete).",
+            help="Type to search destination city, landmark, or address (OpenStreetMap Autocomplete).",
             placeholder="e.g. Vadodara, Jaipur..."
         )
-        dest_suggestions = get_geoapify_autocomplete(dest_query)
+        dest_suggestions = get_location_autocomplete(dest_query)
         if dest_suggestions:
             selected_dest_desc = st.selectbox(
                 "Select Matching Place (Destination)",
@@ -113,11 +113,11 @@ def render_planning_sidebar():
                 index=0,
                 key="dest_loc_select"
             )
-            dest_details = get_geoapify_place_details("", selected_dest_desc)
+            dest_details = get_location_details("", selected_dest_desc)
             target_destination = dest_details["place_name"]
         else:
             target_destination = dest_query
-            dest_details = get_geoapify_place_details("", target_destination)
+            dest_details = get_location_details("", target_destination)
 
 
         sub_location = ""
@@ -145,11 +145,16 @@ def render_planning_sidebar():
         generate_btn = st.button("Generate Trip Plan", use_container_width=True, type="primary")
         
         st.markdown("---")
-        demo_mode = st.toggle("🎥 Presentation Demo Mode", value=False, help="Bypasses the real LLM/MCP APIs to return a reliable, pre-baked scenario for project presentations.")
+        demo_mode = st.toggle("🎥 Demo Mode (Static/Fixture)", value=False, help="Bypasses the real LLM/MCP APIs to return a reliable, pre-baked static scenario. Disable to run Live Mode (Actual Execution).")
         
+        if demo_mode:
+            st.info("ℹ️ Running in **Demo Mode (Static/Fixture)**")
+        else:
+            st.success("⚡ Running in **Live Mode (Actual Execution)**")
+            
         # Verify API key if not in demo mode
-        if not demo_mode and (not os.getenv("GOOGLE_API_KEY") or os.getenv("GOOGLE_API_KEY") == "your_google_api_key"):
-            st.error("GOOGLE_API_KEY is not configured in .env. Enable Demo Mode to test the UI.")
+        if not demo_mode and (not os.getenv("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") == "your_google_api_key"):
+            st.error("GEMINI_API_KEY is not configured in .env. Enable Demo Mode to test the UI.")
             
         return {
             "location": start_location,

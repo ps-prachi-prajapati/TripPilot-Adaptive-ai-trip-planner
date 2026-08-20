@@ -19,17 +19,23 @@ class MockLLM:
         return self
         
     async def ainvoke(self, messages):
-        # Determine response based on the system prompt context
-        if "candidates" in str(messages[0].content).lower() or "destination" in str(messages[0].content).lower():
-            if "identify" in str(messages[0].content).lower() or "extract" in str(messages[0].content).lower():
+        content_lower = str(messages[0].content).lower()
+        
+        # QA/Verification Node mock
+        if "quality assurance" in content_lower or "verify" in content_lower:
+            return AIMessage(content='{"passed": true, "reasons": [], "days_count": 2, "total_cost": 4000.0, "travel_time_valid": true, "interests_matched": true, "grounded_in_observations": true, "weather_suitable": true}')
+            
+        # Candidates Extraction mock
+        if "candidates" in content_lower or "destination" in content_lower:
+            if "identify" in content_lower or "extract" in content_lower:
                 return AIMessage(content='["Mock City A", "Mock City B"]')
         
-        if "changed condition" in str(messages[0].content).lower() or "repair" in str(messages[0].content).lower():
+        # Conflict Identification mock
+        if "changed condition" in content_lower or "repair" in content_lower:
             return AIMessage(content='["Mock Component"]')
-
                 
-        # For data gathering node
-        if "gather" in str(messages[0].content).lower() or "alternatives" in str(messages[0].content).lower():
+        # Data Gathering node mock
+        if "gather" in content_lower or "alternatives" in content_lower:
             return AIMessage(content="DONE_GATHERING")
                 
         return AIMessage(content="Mocked LLM Response Itinerary")

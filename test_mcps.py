@@ -10,7 +10,7 @@ def test_budget_mcp():
     
     # Test calculate_trip_cost
     res = calculate_trip_cost(3, "mid", 100, 150)
-    assert res["total_estimated_cost"] == (150 * 2) + (60 * 3) + 100 + 150 # 300 + 180 + 250 = 730
+    assert res["total_estimated_cost"] == (4000 * 2) + (1200 * 3) + 100 + 150 # 8000 + 3600 + 250 = 11850
     
     # Test validate_budget
     res = validate_budget(800.0, 1000.0)
@@ -61,9 +61,9 @@ def test_places_mcp():
     print("Testing Places MCP...")
     from places_server import search_destinations, search_attractions, search_restaurants, get_place_details
     
-    # Missing keys should be caught gracefully
+    # Missing/invalid keys should be handled gracefully by returning mock fallback data or config error
     res = search_destinations("New York")
-    assert "Error" in str(res) or "Valid FOURSQUARE_API_KEY is not set" in str(res)
+    assert "destinations" in res or "Error" in str(res) or "Valid FOURSQUARE_API_KEY is not set" in str(res)
     
     res = search_destinations("")
     assert "Error: Query cannot be empty" in str(res)

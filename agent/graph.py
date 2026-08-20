@@ -1,7 +1,18 @@
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 from agent.state import TripState
-from agent.agent import extraction_node, data_gathering_node, evaluation_node, generation_node, get_tools
+from agent.agent import (
+    extraction_node, 
+    data_gathering_node, 
+    evaluation_node, 
+    generation_node, 
+    get_tools,
+    conflict_identification_node,
+    adaptation_data_gathering_node,
+    adaptation_evaluation_node,
+    regeneration_node,
+    itinerary_verification_node
+)
 from utils.logging import setup_logging
 
 logger = setup_logging(__name__)
@@ -21,6 +32,10 @@ def _get_msg_content(msg) -> str:
                 parts.append(str(getattr(p, "text")))
         return "".join(parts)
     return str(content)
+async def dynamic_tools_node(state: TripState):
+    """Dynamically executes tools using the currently connected MCP client tools."""
+    tools = get_tools()
+    return await ToolNode(tools).ainvoke(state)
 
 def build_graph():
     """Builds and compiles the 10-step Rank & Select LangGraph workflow."""
@@ -30,9 +45,15 @@ def build_graph():
     # Add nodes
     workflow.add_node("extraction", extraction_node)
     workflow.add_node("data_gathering", data_gathering_node)
-    workflow.add_node("tools", ToolNode(get_tools()))
+    workflow.add_node("tools", dynamic_tools_node)
     workflow.add_node("evaluation", evaluation_node)
     workflow.add_node("generation", generation_node)
+    workflow.add_node("verification", itinerary_verification_node)
+    workflow.add_node("conflict_id", conflict_identification_node)
+    workflow.add_node("adapt_gather", adaptation_data_gathering_node)
+    workflow.add_node("adapt_tools", dynamic_tools_node)
+    workflow.add_node("adapt_eval", adaptation_evaluation_node)
+    workflow.add_node("regeneration", regeneration_node)
     
     # Set entry point
     workflow.set_entry_point("extraction")
@@ -71,13 +92,26 @@ def build_graph():
 
     # We need a small passthrough node to increment the candidate index and clear messages for the next candidate
     def next_candidate_node(state: TripState) -> dict:
+        idx = state.get("current_candidate_index", 0)
+        candidates = list(state.get("candidates", []))
+        messages = state.get("messages", [])
+        
+        if idx < len(candidates):
+            from agent.agent import extract_observations_from_messages
+            candidate_name = candidates[idx]["name"]
+            obs = extract_observations_from_messages(messages, candidate_name)
+            candidates[idx]["context"] = obs.model_dump()
+            logger.info(f"[Graph Setup] Saved observations for candidate {candidate_name}: {candidates[idx]['context']}")
+            
         return {
-            "current_candidate_index": state.get("current_candidate_index", 0) + 1,
-            "messages": [] # Clear message history so the agent starts fresh for the next city
+            "candidates": candidates,
+            "current_candidate_index": idx + 1,
+            "messages": [], # Clear message history so the agent starts fresh for the next city
+            "tool_steps_count": 0 # Reset tool-step counter
         }
     workflow.add_node("next_candidate_setup", next_candidate_node)
 
-    # Edge logic
+    # Edge logic for data gathering
     workflow.add_conditional_edges(
         "data_gathering",
         route_tool_execution,
@@ -88,11 +122,51 @@ def build_graph():
         }
     )
     
-    workflow.add_edge("tools", "data_gathering") # After tool executes, return to LLM to assess
-    workflow.add_edge("next_candidate_setup", "data_gathering") # Loop to the next candidate
+    workflow.add_edge("tools", "data_gathering")
+    workflow.add_edge("next_candidate_setup", "data_gathering")
     
     workflow.add_edge("evaluation", "generation")
-    workflow.add_edge("generation", END)
+    workflow.add_edge("generation", "verification")
+    
+    # Conditional verification routing
+    def route_verification(state: TripState):
+        if state.get("is_verified", False) or state.get("verification_attempts", 0) >= 2:
+            return "end"
+        return "repair"
+        
+    workflow.add_conditional_edges(
+        "verification",
+        route_verification,
+        {
+            "end": END,
+            "repair": "conflict_id"
+        }
+    )
+    
+    # Replan loop edges
+    workflow.add_edge("conflict_id", "adapt_gather")
+    
+    def route_adapt_tools(state: TripState):
+        messages = state.get("messages", [])
+        if not messages:
+            return "adapt_eval"
+        last_message = messages[-1]
+        if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+            return "adapt_tools"
+        return "adapt_eval"
+        
+    workflow.add_conditional_edges(
+        "adapt_gather",
+        route_adapt_tools,
+        {
+            "adapt_tools": "adapt_tools",
+            "adapt_eval": "adapt_eval"
+        }
+    )
+    
+    workflow.add_edge("adapt_tools", "adapt_gather")
+    workflow.add_edge("adapt_eval", "regeneration")
+    workflow.add_edge("regeneration", "verification")
     
     return workflow.compile()
 
@@ -101,15 +175,15 @@ trip_graph = build_graph()
 
 def build_adapt_graph():
     """Builds the dedicated LangGraph workflow for Adaptive Re-planning."""
-    from agent.agent import conflict_identification_node, adaptation_data_gathering_node, adaptation_evaluation_node, regeneration_node
     
     adapt_workflow = StateGraph(TripState)
     
     adapt_workflow.add_node("conflict_id", conflict_identification_node)
     adapt_workflow.add_node("adapt_gather", adaptation_data_gathering_node)
-    adapt_workflow.add_node("adapt_tools", ToolNode(get_tools()))
+    adapt_workflow.add_node("adapt_tools", dynamic_tools_node)
     adapt_workflow.add_node("adapt_eval", adaptation_evaluation_node)
     adapt_workflow.add_node("regeneration", regeneration_node)
+    adapt_workflow.add_node("verification", itinerary_verification_node)
     
     adapt_workflow.set_entry_point("conflict_id")
     
@@ -137,7 +211,21 @@ def build_adapt_graph():
     
     adapt_workflow.add_edge("adapt_tools", "adapt_gather")
     adapt_workflow.add_edge("adapt_eval", "regeneration")
-    adapt_workflow.add_edge("regeneration", END)
+    adapt_workflow.add_edge("regeneration", "verification")
+    
+    def route_verification(state: TripState):
+        if state.get("is_verified", False) or state.get("verification_attempts", 0) >= 2:
+            return "end"
+        return "repair"
+        
+    adapt_workflow.add_conditional_edges(
+        "verification",
+        route_verification,
+        {
+            "end": END,
+            "repair": "conflict_id"
+        }
+    )
     
     return adapt_workflow.compile()
 

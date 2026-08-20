@@ -204,12 +204,6 @@ Edit `.env`:
 # Google Gemini (LLM)
 GOOGLE_API_KEY=your_google_gemini_api_key
 
-# Geoapify (Location Autocomplete)
-GEOAPIFY_API_KEY=your_geoapify_api_key
-
-# Foursquare (Places)
-FOURSQUARE_API_KEY=your_foursquare_api_key
-
 # OpenWeatherMap (Weather)
 OPENWEATHER_API_KEY=your_openweathermap_api_key
 
@@ -234,8 +228,6 @@ run.bat
 | Service | Free Tier | Sign Up |
 |---|---|---|
 | Google Gemini | ✅ Yes | [aistudio.google.com](https://aistudio.google.com) |
-| Geoapify | ✅ Yes (3000 req/day) | [geoapify.com](https://www.geoapify.com) |
-| Foursquare | ✅ Yes | [foursquare.com/developers](https://foursquare.com/developers) |
 | OpenWeatherMap | ✅ Yes (1000 req/day) | [openweathermap.org/api](https://openweathermap.org/api) |
 | OpenRouteService | ✅ Yes (2000 req/day) | [openrouteservice.org](https://openrouteservice.org) |
 

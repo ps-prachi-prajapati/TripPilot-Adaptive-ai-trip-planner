@@ -1,7 +1,10 @@
 import os
 import sys
 import requests
-from fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+except ImportError:
+    from fastmcp import FastMCP
 from dotenv import load_dotenv
 from typing import List
 

@@ -1,7 +1,11 @@
 import os
 import sys
 import requests
-from fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+except ImportError:
+    from fastmcp import FastMCP
+from typing import Any
 
 # Ensure the project root is in the path so `services` can be found
 # when this script is launched as a subprocess by the MCP client
@@ -12,7 +16,7 @@ from services.places import fetch_destinations, fetch_attractions, fetch_restaur
 mcp = FastMCP("Places MCP Server")
 
 @mcp.tool()
-def search_destinations(query: str, limit: int = 5) -> str:
+def search_destinations(query: str, limit: int = 5) -> Any:
     """
     Search for general destinations, neighborhoods, or cities.
     
@@ -40,7 +44,7 @@ def search_destinations(query: str, limit: int = 5) -> str:
 
 
 @mcp.tool()
-def search_attractions(location: str, query: str = "", limit: int = 5) -> str:
+def search_attractions(location: str, query: str = "", limit: int = 5) -> Any:
     """
     Search for tourist attractions, landmarks, and activities in a specific location.
     
@@ -65,7 +69,7 @@ def search_attractions(location: str, query: str = "", limit: int = 5) -> str:
 
 
 @mcp.tool()
-def search_hotels(location: str, query: str = "", limit: int = 5) -> str:
+def search_hotels(location: str, query: str = "", limit: int = 5) -> Any:
     """
     Search for hotels, resorts, or accommodations in a specific location.
     
@@ -90,7 +94,7 @@ def search_hotels(location: str, query: str = "", limit: int = 5) -> str:
 
 
 @mcp.tool()
-def search_restaurants(location: str, query: str = "", limit: int = 5) -> str:
+def search_restaurants(location: str, query: str = "", limit: int = 5) -> Any:
     """
     Search for restaurants, cafes, or bars in a specific location.
     
@@ -115,7 +119,7 @@ def search_restaurants(location: str, query: str = "", limit: int = 5) -> str:
 
 
 @mcp.tool()
-def get_place_details(place_id: str) -> str:
+def get_place_details(place_id: str) -> Any:
     """
     Get detailed information about a specific place using its ID.
     

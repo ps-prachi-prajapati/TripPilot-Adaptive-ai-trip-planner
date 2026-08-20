@@ -33,64 +33,19 @@ def clean_place_name(place_str: str) -> str:
     cleaned = cleaned.replace(" & ", ", ").replace("&", ",")
     return cleaned if cleaned else place_str
 
-GEOAPIFY_CACHE = {}
+LOCATION_CACHE = {}
 
-def get_geoapify_autocomplete(query: str, limit: int = 5) -> List[Dict[str, Any]]:
+def get_location_autocomplete(query: str, limit: int = 5) -> List[Dict[str, Any]]:
     """
-    Fetches place predictions using Geoapify Geocode Autocomplete API.
-    Endpoint: https://api.geoapify.com/v1/geocode/autocomplete
-    Restricts results to India using filter=countrycode:in
+    Fetches place predictions using OpenStreetMap Nominatim geocoding API restricted to India.
     Returns list of dicts: [{"description": str, "place_id": str, "place_name": str, "latitude": float, "longitude": float}]
-    Falls back gracefully to Nominatim / local catalog if Geoapify API key is missing, invalid, or rate-limited.
     """
     if not query or len(query.strip()) < 2:
         return []
 
     clean_q = clean_place_name(query).strip()
-    api_key = os.getenv("GEOAPIFY_API_KEY")
 
-    # Try Geoapify Autocomplete API if key is present
-    if api_key and api_key != "your_geoapify_api_key":
-        try:
-            url = "https://api.geoapify.com/v1/geocode/autocomplete"
-            params = {
-                "text": clean_q,
-                "apiKey": api_key,
-                "filter": "countrycode:in",
-                "limit": limit
-            }
-            resp = requests.get(url, params=params, timeout=3)
-            
-            # Handle rate limits or other API errors gracefully
-            if resp.status_code == 200:
-                data = resp.json()
-                features = data.get("features", [])
-                results = []
-                for item in features:
-                    props = item.get("properties", {})
-                    formatted = props.get("formatted", clean_q)
-                    place_id = props.get("place_id", f"geo_{abs(hash(formatted))}")
-                    name = props.get("name", props.get("city", formatted.split(",")[0]))
-                    lat = props.get("lat")
-                    lon = props.get("lon")
-                    
-                    if lat is not None and lon is not None:
-                        res_dict = {
-                            "description": formatted,
-                            "place_id": place_id,
-                            "place_name": name,
-                            "latitude": float(lat),
-                            "longitude": float(lon)
-                        }
-                        results.append(res_dict)
-                        # Cache details for instant retrieval
-                        GEOAPIFY_CACHE[formatted] = res_dict
-                if results:
-                    return results
-        except Exception:
-            pass
-
-    # Fallback to OpenStreetMap Nominatim geocoding API restricted to India
+    # Query OpenStreetMap Nominatim geocoding API restricted to India
     try:
         url = "https://nominatim.openstreetmap.org/search"
         params = {"q": clean_q, "format": "json", "addressdetails": 1, "limit": limit, "countrycodes": "in"}
@@ -116,12 +71,12 @@ def get_geoapify_autocomplete(query: str, limit: int = 5) -> List[Dict[str, Any]
                         "longitude": lon
                     }
                     results.append(res_dict)
-                    GEOAPIFY_CACHE[disp] = res_dict
+                    LOCATION_CACHE[disp] = res_dict
                 return results
     except Exception:
         pass
 
-    # Final static fallback matched from known coordinates
+    # Fallback matched from known coordinates
     results = []
     key_lower = clean_q.lower()
     for city, coord in KNOWN_COORDINATES.items():
@@ -134,7 +89,7 @@ def get_geoapify_autocomplete(query: str, limit: int = 5) -> List[Dict[str, Any]
                 "longitude": coord["lon"]
             }
             results.append(res_dict)
-            GEOAPIFY_CACHE[coord["full_address"]] = res_dict
+            LOCATION_CACHE[coord["full_address"]] = res_dict
 
     if results:
         return results[:limit]
@@ -148,10 +103,10 @@ def get_geoapify_autocomplete(query: str, limit: int = 5) -> List[Dict[str, Any]
         "latitude": 23.0225,
         "longitude": 72.5714
     }
-    GEOAPIFY_CACHE[fallback_desc] = res_dict
+    LOCATION_CACHE[fallback_desc] = res_dict
     return [res_dict]
 
-def get_geoapify_place_details(place_id: str, default_name: str = "Location") -> Dict[str, Any]:
+def get_location_details(place_id: str, default_name: str = "Location") -> Dict[str, Any]:
     """
     Fetches full place details using cache, catalog, or Nominatim lookup.
     Returns: {"place_name": str, "full_address": str, "latitude": float, "longitude": float, "place_id": str}
@@ -159,8 +114,8 @@ def get_geoapify_place_details(place_id: str, default_name: str = "Location") ->
     clean_name = clean_place_name(default_name)
 
     # 1. Check cache first
-    if default_name in GEOAPIFY_CACHE:
-        cache_item = GEOAPIFY_CACHE[default_name]
+    if default_name in LOCATION_CACHE:
+        cache_item = LOCATION_CACHE[default_name]
         return {
             "place_name": cache_item["place_name"],
             "full_address": cache_item["description"],
@@ -168,8 +123,8 @@ def get_geoapify_place_details(place_id: str, default_name: str = "Location") ->
             "longitude": cache_item["longitude"],
             "place_id": cache_item["place_id"]
         }
-    if clean_name in GEOAPIFY_CACHE:
-        cache_item = GEOAPIFY_CACHE[clean_name]
+    if clean_name in LOCATION_CACHE:
+        cache_item = LOCATION_CACHE[clean_name]
         return {
             "place_name": cache_item["place_name"],
             "full_address": cache_item["description"],
