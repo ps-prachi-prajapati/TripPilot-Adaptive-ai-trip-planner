@@ -601,9 +601,6 @@ Copy `.env.example` to `.env` and fill in your API keys:
 # AI / LLM
 GOOGLE_API_KEY=your_google_gemini_api_key
 
-# Places Data
-FOURSQUARE_API_KEY=your_foursquare_api_key
-
 # Weather
 OPENWEATHER_API_KEY=your_openweathermap_api_key
 
