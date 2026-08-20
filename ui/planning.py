@@ -105,19 +105,23 @@ def render_planning_sidebar():
             help="Type to search destination city, landmark, or address (OpenStreetMap Autocomplete).",
             placeholder="e.g. Vadodara, Jaipur..."
         )
-        dest_suggestions = get_location_autocomplete(dest_query)
-        if dest_suggestions:
-            selected_dest_desc = st.selectbox(
-                "Select Matching Place (Destination)",
-                [s["description"] for s in dest_suggestions],
-                index=0,
-                key="dest_loc_select"
-            )
-            dest_details = get_location_details("", selected_dest_desc)
-            target_destination = dest_details["place_name"]
-        else:
+        if " & " in dest_query:
             target_destination = dest_query
             dest_details = get_location_details("", target_destination)
+        else:
+            dest_suggestions = get_location_autocomplete(dest_query)
+            if dest_suggestions:
+                selected_dest_desc = st.selectbox(
+                    "Select Matching Place (Destination)",
+                    [s["description"] for s in dest_suggestions],
+                    index=0,
+                    key="dest_loc_select"
+                )
+                dest_details = get_location_details("", selected_dest_desc)
+                target_destination = dest_details["place_name"]
+            else:
+                target_destination = dest_query
+                dest_details = get_location_details("", target_destination)
 
 
         sub_location = ""
