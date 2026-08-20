@@ -145,6 +145,7 @@ def main():
                     
                 st.session_state['trip_state'] = result
                 status.update(label="Trip Planning Complete!", state="complete", expanded=False)
+                st.toast("🎉 New Itinerary Generated! Switch to the 'Itinerary & Map' tab to view it.", icon="🌍")
             except Exception as e:
                 logger.error(f"Trip generation failed: {e}", exc_info=True)
                 status.update(label="Planning Failed", state="error", expanded=True)
