@@ -21,7 +21,8 @@
 | :---: | :---: |
 | <img src="https://github.com/user-attachments/assets/c029b5d5-a6fb-4dce-a2eb-051f7995a6d2" width="100%" alt="Home Screen" /> | <img src="https://github.com/user-attachments/assets/8a4c3918-f8e8-4b2f-830b-8118712fe2dc" width="100%" alt="Generated Itinerary" /> |
 | **Budget Breakdown** | **Agent Activity Log** |
-| <img src="https://github.com/user-attachments/assets/62e235b8-90b5-476c-adf3-bc55c92f6274" width="100%" alt="Budget Breakdown" /> | _(Screenshot to be added)_ |
+| <img src="https://github.com/user-attachments/assets/62e235b8-90b5-476c-adf3-bc55c92f6274" width="100%" alt="Budget Breakdown" /> | <img width="1278" height="862" alt="image" src="https://github.com/user-attachments/assets/8c079f27-0995-461a-82e8-6add4a4b3e56" />
+|
 
 </div>
 
