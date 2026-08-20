@@ -41,7 +41,7 @@ Standard LLM-based travel planners have two major issues:
 
 ## ✨ Key Features
 
-- **📍 Location Autocomplete** — Geoapify-powered search restricted to India with live suggestions
+- **📍 Location Autocomplete** — OpenStreetMap-powered live search restricted to India with suggestions
 - **🤖 Multi-Candidate Evaluation** — AI evaluates 3–5 destinations and picks the best one based on real constraints
 - **🌦️ Weather-Aware Planning** — Automatically swaps outdoor activities when rain is forecasted
 - **💰 Deterministic Budget Math** — All cost calculations are done by isolated Python tools, never by the LLM
@@ -81,7 +81,7 @@ Standard LLM-based travel planners have two major issues:
   Budget       Places      Transport   Weather
   Server       Server       Server     Server
   (4 tools)   (5 tools)   (3 tools)  (3 tools)
-  No API      Foursquare  OpenRoute  OpenWeather
+  No API     Local Catalog OpenRoute  OpenWeather
 ```
 
 ---
@@ -96,7 +96,7 @@ Standard LLM-based travel planners have two major issues:
 | `evaluate_constraints` | Validates travel time, weather, transport mode |
 | `compare_trip_options` | Deterministically ranks two destination options |
 
-### Places Server (`places_server.py`) — Foursquare API
+### Places Server (`places_server.py`) — Local Catalog
 | Tool | Purpose |
 |---|---|
 | `search_destinations` | Finds candidate cities matching a query |
@@ -162,7 +162,7 @@ TripPilot/
 │   └── styles.css            # Custom CSS theme
 │
 └── utils/
-    ├── place_search.py       # Geoapify autocomplete
+    ├── place_search.py       # OpenStreetMap autocomplete
     ├── validation.py         # Input validation
     └── logging.py            # Logging setup
 ```

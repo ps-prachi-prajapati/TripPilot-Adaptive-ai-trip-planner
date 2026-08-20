@@ -99,7 +99,7 @@ l2 project/
 │
 ├── mcp_servers/              ← 4 FastMCP server scripts (run as subprocesses)
 │   ├── budget_server.py      ← 4 tools: cost calculation & constraint checking
-│   ├── places_server.py      ← 5 tools: Foursquare POI search
+│   ├── places_server.py      ← 5 tools: Local mock catalog POI search
 │   ├── transport_server.py   ← 3 tools: routing & cost estimation
 │   └── weather_server.py     ← 3 tools: weather forecasting & suitability
 │
@@ -147,7 +147,7 @@ MCP Servers (4 servers, 15 tools total)
 │   ├── evaluate_constraints
 │   └── compare_trip_options
 │
-├── Places Server (5 tools) — Foursquare API
+├── Places Server (5 tools) — Local Catalog
 │   ├── search_destinations
 │   ├── search_attractions
 │   ├── search_restaurants
@@ -260,8 +260,8 @@ MCP Servers (4 servers, 15 tools total)
 +----------+  +---------------+  +----------+  +----------------+
 |  Budget  |  | Places Server |  |Transport |  | Weather Server |
 |  Server  |  | (5 tools)     |  | Server   |  | (3 tools)      |
-|  (4 tools)|  | Foursquare   |  | (3 tools)|  | OpenWeatherMap |
-|  No API  |  | API           |  | ORS API  |  |                |
+|  (4 tools)|  | Local Mock   |  | (3 tools)|  | OpenWeatherMap |
+|  No API  |  | Catalog       |  | ORS API  |  |                |
 +----------+  +---------------+  +----------+  +----------------+
                                  External APIs (Real-world data)
 ```
@@ -310,7 +310,7 @@ Each tool result is converted to a plain string and fed back to the LLM as a `To
                          v
 +--------------------------------------------------+
 |  DATA GATHERING NODE (ReAct Loop per candidate)  |
-|  * search_attractions (Foursquare)               |
+|  * search_attractions (Local Catalog)            |
 |  * get_current_weather (OpenWeatherMap)           |
 |  * calculate_travel_time (OpenRouteService)       |
 |  * calculate_transport_cost                      |
@@ -659,11 +659,11 @@ python test_mcps.py
 | 2 | Budget | `validate_budget` | None (math) | Check if cost exceeds user budget |
 | 3 | Budget | `evaluate_constraints` | None (logic) | Validate travel time, weather & transport mode |
 | 4 | Budget | `compare_trip_options` | None (logic) | Rank two trip alternatives deterministically |
-| 5 | Places | `search_destinations` | Foursquare | Find candidate cities/places |
-| 6 | Places | `search_attractions` | Foursquare | Find tourist landmarks & activities |
-| 7 | Places | `search_restaurants` | Foursquare | Find dining options |
-| 8 | Places | `search_hotels` | Foursquare | Find accommodation options |
-| 9 | Places | `get_place_details` | Foursquare | Get full info for a specific place ID |
+| 5 | Places | `search_destinations` | Local Catalog | Find candidate cities/places |
+| 6 | Places | `search_attractions` | Local Catalog | Find tourist landmarks & activities |
+| 7 | Places | `search_restaurants` | Local Catalog | Find dining options |
+| 8 | Places | `search_hotels` | Local Catalog | Find accommodation options |
+| 9 | Places | `get_place_details` | Local Catalog | Get full info for a specific place ID |
 | 10 | Transport | `find_transport_options` | None | List supported routing modes |
 | 11 | Transport | `calculate_travel_time` | OpenRouteService | Real route distance & duration between coords |
 | 12 | Transport | `calculate_transport_cost` | None (heuristic) | Estimate travel cost from distance |
